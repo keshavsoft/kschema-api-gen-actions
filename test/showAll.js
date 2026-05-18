@@ -9,6 +9,7 @@ const startFunc = async () => {
     const func = await load("ShowAll");
 
     func({
+        cmd: "ShowAll",
         toPath: process.cwd()
     });
 };

@@ -1,10 +1,11 @@
+// resolveCommand.js
+
 import Insert from "../tasks/actions/insert.js";
 import ShowAll from "../tasks/actions/showAll.js";
 
-// resolveCommand.js
 const map = {
-    ShowAll,
-    Insert
+    showAll: ShowAll,
+    insert: Insert
 };
 
 export default function resolveCommand(cmd) {

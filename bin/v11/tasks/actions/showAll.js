@@ -13,6 +13,8 @@ import { announce } from "./ShowAll/steps/announce.js";
 import resolveFolderName from "./ShowAll/steps/resolveFolderName.js";
 
 export default ({ cmd = "", toPath, isAnnounce = true, checkBeforeCreate = true }) => {
+    console.log("cmd : ", cmd);
+
     const localToPath = toPath;
 
     const resolvedFolderName = resolveFolderName({
