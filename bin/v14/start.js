@@ -12,7 +12,7 @@ const run = async () => {
 
   if (input.cmd === "--help" || input.cmd === "-h" || input.cmd === "help") return showUsage(version);
 
-  const command = resolveCommand(input.cmd);
+  const command = await resolveCommand(input.cmd);
 
   if (!command) return (console.log(`Unknown command: ${input.cmd}\n`), showUsage(version));
 

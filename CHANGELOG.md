@@ -173,3 +173,7 @@ json driven till usage
 ## [1.14.2] - 2026-05-18
 
 docs html added version
+
+## [1.14.3] - 2026-05-18
+
+await added and case in config json
