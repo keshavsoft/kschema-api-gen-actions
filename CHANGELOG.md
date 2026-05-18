@@ -157,3 +157,7 @@ insert and showall perfect with test folder
 ## [1.12.1] - 2026-05-18
 
 folders as methods
+
+## [1.12.2] - 2026-05-18
+
+Distinct start
