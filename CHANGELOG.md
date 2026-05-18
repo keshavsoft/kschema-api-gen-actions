@@ -153,3 +153,7 @@ The format is based on Keep a Changelog.
 ## [1.11.2] - 2026-05-18
 
 insert and showall perfect with test folder
+
+## [1.12.1] - 2026-05-18
+
+folders as methods
