@@ -1,50 +1,49 @@
 /*
-KSchema CLI – Entry Flow
+KSchema CLI – Execution Flow
 
-1. Read user input from terminal (parseInput)
-2. If no command → show usage (first-time user safety)
-3. If help flags → show usage (quick guidance)
-4. Resolve command dynamically (no hardcoding logic)
-5. If command not found → inform + guide back to usage
-6. Execute command with parsed input
+1. Parse terminal input
+2. Show usage if command/help missing
+3. Resolve command dynamically
+4. Load command dynamically
+5. Execute action
 
-Goal:
-- Zero confusion for user
-- Single source of truth (showUsage)
-- Easy to extend (just add commands, no core changes)
+Architecture Goals:
+- JSON driven command system
+- Zero hardcoded command maps
+- Single source of truth
+- Easy scalability
+- Beginner friendly structure
 */
+import actions from "../config/actions.json" with { type: "json" };
 
 export default function showUsage(version) {
-    const g = "\x1b[32m";
-    const y = "\x1b[33m";
-    const c = "\x1b[36m";
-    const gray = "\x1b[90m";
-    const r = "\x1b[0m";
+  const g = "\x1b[32m";
+  const y = "\x1b[33m";
+  const c = "\x1b[36m";
+  const gray = "\x1b[90m";
+  const r = "\x1b[0m";
 
-    console.log(`
+  const commandsText = actions.map((item) => {
+    return `  ${g}${item.exportFile}${r}     ${item.description}`;
+  }).join("\n");
+
+  const examplesText = actions.map((item) => {
+    return `  ${gray}npx @keshavsoft/kschema-api-gen-actions ${item.exportFile}${r}`;
+  }).join("\n");
+
+  console.log(`
 ${c}🚀 KSchema Api Generator v${version}${r}
 
 ${y}Usage:${r}
-  ${g}npx @keshavsoft/kschema-api-gen${r} <command> [options]
+  ${g}npx @keshavsoft/kschema-api-gen-actions${r} <command> [options]
 
 ${y}Commands:${r}
-  ${g}StartEndPoint${r}     Initialize a new folder and files
-  ${g}AddSubRoute${r}       Initialize a new folder and files
-  ${g}AddTableName${r}      Initialize a new folder and files for TableName
-  ${g}ShowAll${r}           Initialize a new folder and files for action
-  
-  ${g}CreateApi${r}         Creates new end point and hooks to app.js
-  ${g}InsertApi${r}         Creates new InsertApi end point and hooks to app.js
-  
+${commandsText}
+
 ${y}Examples:${r}
-  ${gray}npx @keshavsoft/kschema-api-gen StartEndPoint${r}
-  ${gray}npx @keshavsoft/kschema-api-gen AddSubRoute${r}
-  ${gray}npx @keshavsoft/kschema-api-gen AddTableName${r}
-  ${gray}npx @keshavsoft/kschema-api-gen ShowAll${r}
-  ${gray}npx @keshavsoft/kschema-api-gen CreateApi Api/V1/journals/ShowAll${r}
-  ${gray}npx @keshavsoft/kschema-api-gen InsertApi Api/V1/journals/Insert${r}
+${examplesText}
 
 ${y}Tip:${r}
-  ${gray}npm i -g @keshavsoft/kschema-api-gen${r}
+  ${gray}npm i -g @keshavsoft/kschema-api-gen-actions${r}
 `);
 }

@@ -165,3 +165,7 @@ Distinct start
 ## [1.13.1] - 2026-05-18
 
 config driven
+
+## [1.14.1] - 2026-05-18
+
+json driven till usage
