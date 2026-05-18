@@ -18,7 +18,7 @@
     ".": "./index.js"
   },
   "bin": {
-    "kschema-api-gen": "./bin/cli.js"
+    "kschema-api-gen-actions": "./bin/cli.js"
   },
   "files": [
     "bin/",
