@@ -1,5 +1,5 @@
 import path from "path";
-import { endPointsJs } from "@keshavsoft/kschema-api-check";
+import endPointsJs from "@keshavsoft/kschema-api-check";
 
 import { locateSource } from "./GetMethods/ShowAll/steps/locateSource.js";
 import { locateDestination } from "./GetMethods/ShowAll/steps/locateDestination.js";
@@ -12,7 +12,7 @@ import { announce } from "./GetMethods/ShowAll/steps/announce.js";
 
 import resolveFolderName from "./GetMethods/ShowAll/steps/resolveFolderName.js";
 
-export default ({ cmd = "", toPath, isAnnounce = true, checkBeforeCreate = true }) => {
+export default async ({ cmd = "", toPath, isAnnounce = true, checkBeforeCreate = true }) => {
     const localToPath = toPath;
 
     const resolvedFolderName = resolveFolderName({
@@ -37,10 +37,17 @@ export default ({ cmd = "", toPath, isAnnounce = true, checkBeforeCreate = true 
     });
 
     if (createFolderResponse.KTF) {
-        endPointsJs({
+        const loadEndPointsJs = await endPointsJs();
+
+        await loadEndPointsJs({
             toPath: localToPath,
             action: resolvedFolderName
         });
+
+        // await endPointsJs({
+        //     toPath: localToPath,
+        //     action: resolvedFolderName
+        // });
 
         // updateEndPointsJs({
         //     appJsPath: `${localToPath}/end-points.js`,

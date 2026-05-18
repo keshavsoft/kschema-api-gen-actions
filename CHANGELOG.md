@@ -177,3 +177,7 @@ docs html added version
 ## [1.14.3] - 2026-05-18
 
 await added and case in config json
+
+## [1.15.3] - 2026-05-18
+
+used check perfect for showall
