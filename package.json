@@ -11,7 +11,7 @@
   ],
   "dependencies": {
     "@keshavsoft/kschema": "^1.17.8",
-    "@keshavsoft/kschema-api-check": "^1.11.2"
+    "@keshavsoft/kschema-api-check": "^1.11.3"
   },
   "type": "module",
   "exports": {
