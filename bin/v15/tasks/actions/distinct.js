@@ -1,16 +1,15 @@
 import path from "path";
 import { endPointsJs } from "@keshavsoft/kschema-api-check";
 
-import { locateSource } from "./GetMethods/ShowAll/steps/locateSource.js";
-import { locateDestination } from "./GetMethods/ShowAll/steps/locateDestination.js";
+import { locateSource } from "./GetMethods/Distinct/steps/locateSource.js";
+import { locateDestination } from "./GetMethods/Distinct/steps/locateDestination.js";
 import { createFolder } from "../core/createFolder.js";
 
-// import updateEndPointsJs from "./ShowAll/steps/updateEndPointsJs.js";
-import createHttpFile from "./GetMethods/ShowAll/steps/createHttpFile.js";
+import createHttpFile from "./GetMethods/Distinct/steps/createHttpFile.js";
 
-import { announce } from "./GetMethods/ShowAll/steps/announce.js";
+import { announce } from "./GetMethods/Distinct/steps/announce.js";
 
-import resolveFolderName from "./GetMethods/ShowAll/steps/resolveFolderName.js";
+import resolveFolderName from "./GetMethods/Distinct/steps/resolveFolderName.js";
 
 export default ({ cmd = "", toPath, isAnnounce = true, checkBeforeCreate = true }) => {
     const localToPath = toPath;
