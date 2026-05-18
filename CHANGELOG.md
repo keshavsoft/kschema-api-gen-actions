@@ -169,3 +169,7 @@ config driven
 ## [1.14.1] - 2026-05-18
 
 json driven till usage
+
+## [1.14.2] - 2026-05-18
+
+docs html added version
