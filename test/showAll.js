@@ -6,8 +6,9 @@ const load = async (cmd) => {
 };
 
 const startFunc = async () => {
-    const func = await load({
-        folderName: "showAll",
+    const func = await load("ShowAll");
+
+    func({
         toPath: process.cwd()
     });
 };
