@@ -12,11 +12,11 @@ import { announce } from "./Insert/steps/announce.js";
 
 import resolveFolderName from "./Insert/steps/resolveFolderName.js";
 
-export default ({ folderName = "", toPath, isAnnounce = true, checkBeforeCreate = true }) => {
+export default ({ cmd = "", toPath, isAnnounce = true, checkBeforeCreate = true }) => {
     const localToPath = toPath;
 
     const resolvedFolderName = resolveFolderName({
-        name: folderName
+        name: cmd
     });
 
     if (resolvedFolderName.KTF === false) {
