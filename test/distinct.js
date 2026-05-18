@@ -1,4 +1,5 @@
 import getLatestVersion from "../bin/core/getLatestVersion.js";
+const commandToSend = "Distinct";
 
 const load = async (cmd) => {
     const v = getLatestVersion();
@@ -6,10 +7,10 @@ const load = async (cmd) => {
 };
 
 const startFunc = async () => {
-    const func = await load("ShowAll");
+    const func = await load(commandToSend);
 
     func({
-        cmd: "ShowAll",
+        cmd: commandToSend,
         toPath: process.cwd()
     });
 };
