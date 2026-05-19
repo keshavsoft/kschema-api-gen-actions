@@ -1,6 +1,6 @@
 {
   "name": "@keshavsoft/kschema-api-gen-actions",
-  "version": "1.16.2",
+  "version": "1.16.3",
   "description": "CLI to scaffold projects using templates",
   "keywords": [
     "cli",
@@ -11,7 +11,7 @@
   ],
   "dependencies": {
     "@keshavsoft/kschema": "^1.17.8",
-    "@keshavsoft/kschema-api-check": "^1.12.2"
+    "@keshavsoft/kschema-api-check": "^1.12.3"
   },
   "type": "module",
   "exports": {

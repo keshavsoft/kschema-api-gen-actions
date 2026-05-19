@@ -185,3 +185,7 @@ used check perfect for showall
 ## [1.16.2] - 2026-05-19
 
 distinct perfect from json
+
+## [1.16.3] - 2026-05-19
+
+filtercolumns added

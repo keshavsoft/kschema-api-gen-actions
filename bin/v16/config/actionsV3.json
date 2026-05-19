@@ -31,16 +31,5 @@
             "importLine": "import distinctFunc from './Distinct/controller.js';",
             "usageLine": "router.get('/Distinct/:columnName', (req, res) => distinctFunc({ req, res, inTableName : tableName}));"
         }
-    },
-    {
-        "cmd": "FilterColumns",
-        "file": "filterColumns",
-        "exportFile": "FilterColumns",
-        "group": "PostMethods",
-        "description": "Generate FilterColumns POST action",
-        "endPointsJs": {
-            "importLine": "import filterColumnsFunc from './FilterColumns/controller.js';",
-            "usageLine": "router.post('/FilterColumns', express.json(), (req, res) => filterColumnsFunc({ req, res, inTableName : tableName}));"
-        }
     }
 ]
