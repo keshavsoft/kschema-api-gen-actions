@@ -181,3 +181,7 @@ await added and case in config json
 ## [1.15.3] - 2026-05-18
 
 used check perfect for showall
+
+## [1.16.2] - 2026-05-19
+
+distinct perfect from json

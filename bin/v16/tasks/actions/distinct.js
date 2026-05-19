@@ -1,17 +1,17 @@
 import path from "path";
-import { endPointsJs } from "@keshavsoft/kschema-api-check";
+import endPointsJs from "@keshavsoft/kschema-api-check";
 
-import { locateSource } from "./GetMethods/Distinct/steps/locateSource.js";
-import { locateDestination } from "./GetMethods/Distinct/steps/locateDestination.js";
+import { locateSource } from "./GetMethods/Distinct/V2/steps/locateSource.js";
+import { locateDestination } from "./GetMethods/Distinct/V2/steps/locateDestination.js";
 import { createFolder } from "../core/createFolder.js";
 
-import createHttpFile from "./GetMethods/Distinct/steps/createHttpFile.js";
+import createHttpFile from "./GetMethods/Distinct/V2/steps/createHttpFile.js";
 
-import { announce } from "./GetMethods/Distinct/steps/announce.js";
+import { announce } from "./GetMethods/Distinct/V2/steps/announce.js";
 
-import resolveFolderName from "./GetMethods/Distinct/steps/resolveFolderName.js";
+import resolveFolderName from "./GetMethods/Distinct/V2/steps/resolveFolderName.js";
 
-export default ({ cmd = "", toPath, isAnnounce = true, checkBeforeCreate = true }) => {
+const startFunc = async ({ cmd = "", toPath, isAnnounce = true, checkBeforeCreate = true }) => {
     const localToPath = toPath;
 
     const resolvedFolderName = resolveFolderName({
@@ -36,15 +36,10 @@ export default ({ cmd = "", toPath, isAnnounce = true, checkBeforeCreate = true 
     });
 
     if (createFolderResponse.KTF) {
-        endPointsJs({
+        await endPointsJs({
             toPath: localToPath,
             action: resolvedFolderName
         });
-
-        // updateEndPointsJs({
-        //     appJsPath: `${localToPath}/end-points.js`,
-        //     endpoint: resolvedFolderName
-        // });
 
         createHttpFile({
             inTargetPath: path.join(localToPath, resolvedFolderName),
@@ -56,3 +51,5 @@ export default ({ cmd = "", toPath, isAnnounce = true, checkBeforeCreate = true 
 
     return resolveFolderName;
 };
+
+export default startFunc
