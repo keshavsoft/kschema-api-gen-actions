@@ -5,7 +5,6 @@ import { locateSource } from "./GetMethods/ShowAll/steps/locateSource.js";
 import { locateDestination } from "./GetMethods/ShowAll/steps/locateDestination.js";
 import { createFolder } from "../core/createFolder.js";
 
-// import updateEndPointsJs from "./ShowAll/steps/updateEndPointsJs.js";
 import createHttpFile from "./GetMethods/ShowAll/steps/createHttpFile.js";
 
 import { announce } from "./GetMethods/ShowAll/steps/announce.js";
@@ -37,22 +36,10 @@ export default async ({ cmd = "", toPath, isAnnounce = true, checkBeforeCreate =
     });
 
     if (createFolderResponse.KTF) {
-        const loadEndPointsJs = await endPointsJs();
-
-        await loadEndPointsJs({
+        await endPointsJs({
             toPath: localToPath,
             action: resolvedFolderName
         });
-
-        // await endPointsJs({
-        //     toPath: localToPath,
-        //     action: resolvedFolderName
-        // });
-
-        // updateEndPointsJs({
-        //     appJsPath: `${localToPath}/end-points.js`,
-        //     endpoint: resolvedFolderName
-        // });
 
         createHttpFile({
             inTargetPath: path.join(localToPath, resolvedFolderName),

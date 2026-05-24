@@ -193,3 +193,7 @@ filtercolumns added
 ## [1.17.1] - 2026-05-24
 
 start
+
+## [1.17.2] - 2026-05-24
+
+showAll test done
