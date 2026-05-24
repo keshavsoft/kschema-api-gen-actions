@@ -189,3 +189,7 @@ distinct perfect from json
 ## [1.16.3] - 2026-05-19
 
 filtercolumns added
+
+## [1.17.1] - 2026-05-24
+
+start
