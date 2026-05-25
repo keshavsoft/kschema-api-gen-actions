@@ -1,123 +1,201 @@
-# Development Guide
+# KSchema API Gen Actions
 
-> Internal developer documentation for `@keshavsoft/kschema-api-gen-actions`
+## Introduction
 
-This document explains:
+`@keshavsoft/kschema-api-gen-actions` is not just a collection of scripts.  
+It is a modular command execution framework designed to generate API-related code using scalable architecture principles.
 
-- project architecture
-- command flow
-- folder structure
-- dynamic loading system
-- how to add new actions
-- how v13 works internally
+The project evolved from simple utility scripts into a structured CLI platform capable of:
 
----
+- command-based execution
+- version isolation
+- dynamic module loading
+- task orchestration
+- scalable action registration
+- reusable workflow pipelines
 
-# Goal of This Project
-
-This CLI helps developers generate Express.js API actions quickly.
-
-Instead of manually creating:
-
-- routes
-- controller imports
-- folders
-- boilerplate
-
-the CLI automates everything.
+The primary goal of this architecture is to make adding new generators simple without changing the core execution engine.
 
 ---
 
-# High Level Flow
+# High Level Architecture
 
-When user runs:
+The application follows a layered execution pipeline.
 
-```bash
-npx kschema-api-gen insert
-```
-
-the application flow is:
-
-```txt
+```text
 cli.js
     ↓
-start.js
+loadRunner.js
     ↓
-parseInput.js
+v17/start.js
     ↓
 resolveCommand.js
     ↓
-actions.json
+dynamic task import
     ↓
-dynamic import()
-    ↓
-tasks/actions/insert.js
+action execution
 ```
 
----
-
-# v13 Architecture
-
-v13 introduced:
-
-- JSON metadata driven command loading
-- dynamic imports
-- removal of duplicate export files
-- centralized command registry
-
-This removed a lot of repetitive code.
+Each layer has a single responsibility.
 
 ---
 
-# Folder Structure
+# Why This Architecture Exists
 
-```txt
-bin/
-├── cli.js
-│
-├── v13/
-│   ├── commands/
-│   │   └── loadCommand.js
-│   │
-│   ├── config/
-│   │   └── actions.json
-│   │
-│   ├── core/
-│   │   ├── parseInput.js
-│   │   ├── resolveCommand.js
-│   │   ├── showUsage.js
-│   │   └── createFolder.js
-│   │
-│   ├── tasks/
-│   │   └── actions/
-│   │       ├── insert.js
-│   │       ├── showAll.js
-│   │       └── distinct.js
-│   │
-│   └── start.js
+Earlier script-based systems usually become difficult to maintain because:
+
+- all logic stays in one file
+- commands become tightly coupled
+- adding new features creates side effects
+- version upgrades break older behavior
+
+This project avoids those problems by separating:
+
+- command resolution
+- execution orchestration
+- task implementation
+- version management
+- configuration metadata
+
+---
+
+# Entry Point
+
+## cli.js
+
+Location:
+
+```text
+bin/cli.js
 ```
 
+This is the public executable entry point.
+
+Responsibilities:
+
+- detect latest supported version
+- load correct runtime
+- execute runner
+
+Example flow:
+
+```js
+const version = getLatestVersion();
+
+const runner = await loadRunner(version);
+
+await runner();
+```
+
+This file intentionally contains minimal logic.
+
+That keeps the entry layer stable.
+
 ---
 
-# Core Idea
+# Runtime Loader
 
-Earlier versions required updating multiple files manually.
+## loadRunner.js
+
+Location:
+
+```text
+bin/core/loadRunner.js
+```
+
+Purpose:
+
+Dynamically load the correct runtime based on version.
 
 Example:
 
-- import statement
-- command map
-- export command file
-
-This caused duplication.
-
-v13 solves this using:
-
-```txt
-actions.json
+```js
+await import(`../${version}/start.js`)
 ```
 
-as the single source of truth.
+Benefits:
+
+- version isolation
+- backward compatibility
+- safe upgrades
+- independent runtime evolution
+
+This design allows multiple versions to coexist.
+
+Example:
+
+```text
+v15/
+v16/
+v17/
+```
+
+Each version behaves like an independent runtime engine.
+
+---
+
+# Runtime Engine
+
+## start.js
+
+Location:
+
+```text
+bin/v17/start.js
+```
+
+Responsibilities:
+
+- parse user input
+- validate commands
+- resolve executable task
+- execute selected action
+
+Execution flow:
+
+```text
+parse input
+    ↓
+resolve command
+    ↓
+load task
+    ↓
+execute task
+```
+
+This file acts as the orchestration layer.
+
+---
+
+# Command Resolution
+
+## resolveCommand.js
+
+Location:
+
+```text
+bin/v17/core/resolveCommand.js
+```
+
+Purpose:
+
+Convert command text into executable modules.
+
+Example:
+
+```js
+const matched = actions.find(x => x.cmd === cmd);
+```
+
+Then dynamically load:
+
+```js
+await import(`../tasks/actions/${matched.file}.js`)
+```
+
+This creates a plugin-style architecture.
+
+The core engine never needs direct knowledge about task implementations.
 
 ---
 
@@ -125,365 +203,277 @@ as the single source of truth.
 
 Location:
 
-```txt
-bin/v13/config/actions.json
+```text
+bin/v17/config/actions.json
 ```
 
-Example:
+This is one of the most important files in the architecture.
 
-```json
-[
-    {
-        "cmd": "showAll",
-        "file": "showAll",
-        "exportFile": "ShowAll",
-        "group": "GetMethods"
-    },
-    {
-        "cmd": "insert",
-        "file": "insert",
-        "exportFile": "Insert",
-        "group": "PostMethods"
-    }
-]
-```
+It acts as:
 
----
-
-# Meaning of Each Field
-
-| Field | Purpose |
-|---|---|
-| cmd | command typed in CLI |
-| file | JS file inside tasks/actions |
-| exportFile | external/export name |
-| group | logical grouping |
-
----
-
-# Dynamic Command Loading
-
-## resolveCommand.js
-
-Instead of manual imports:
-
-```js
-import Insert from "...";
-import ShowAll from "...";
-```
-
-v13 dynamically imports command files.
-
-Code:
-
-```js
-import actions from "../config/actions.json" with { type: "json" };
-
-export default async function resolveCommand(cmd) {
-    const matched = actions.find(x => x.cmd === cmd);
-
-    if (!matched) return null;
-
-    const module = await import(`../tasks/actions/${matched.file}.js`);
-
-    return module.default;
-};
-```
-
----
-
-# Why Dynamic Imports?
-
-Benefits:
-
-- zero duplicate imports
-- easier scaling
-- cleaner architecture
-- fewer manual updates
-- less maintenance
-
----
-
-# loadCommand.js
-
-Location:
-
-```txt
-bin/v13/commands/loadCommand.js
-```
-
-Purpose:
-
-Used by tests and external loaders.
-
-Code:
-
-```js
-import actions from "../config/actions.json" with { type: "json" };
-
-export default async function loadCommand(name) {
-    const matched = actions.find(x => x.exportFile === name);
-
-    if (!matched) return null;
-
-    const module = await import(`../tasks/actions/${matched.file}.js`);
-
-    return module.default;
-}
-```
-
----
-
-# Action Files
-
-Location:
-
-```txt
-tasks/actions/
-```
-
-Examples:
-
-```txt
-insert.js
-showAll.js
-distinct.js
-```
-
-Each action contains the actual business logic.
-
-These files:
-
-- create folders
-- copy templates
-- update routes
-- generate boilerplate
-
----
-
-# Adding a New Action
-
-Example:
-
-```txt
-update.js
-```
-
----
-
-## Step 1
-
-Create:
-
-```txt
-tasks/actions/update.js
-```
-
----
-
-## Step 2
-
-Add entry in:
-
-```txt
-config/actions.json
-```
+- command registry
+- metadata registry
+- execution mapping layer
 
 Example:
 
 ```json
 {
-    "cmd": "update",
-    "file": "update",
-    "exportFile": "Update",
-    "group": "PostMethods"
+  "cmd": "Insert",
+  "file": "insert"
 }
 ```
 
+Meaning:
+
+```text
+CLI command "Insert"
+    ↓
+maps to
+    ↓
+insert.js
+```
+
+Benefits:
+
+- easy scalability
+- zero hardcoded command logic
+- configurable runtime behavior
+- cleaner orchestration
+
+Adding a new command becomes configuration-driven.
+
 ---
 
-## Step 3
+# Task Layer
 
-Done.
+Location:
 
-No additional imports required.
+```text
+bin/v17/tasks/actions/
+```
 
-No command maps required.
+This layer contains actual business logic.
 
-No export files required.
+Examples:
 
-Everything works automatically.
+```text
+showAll.js
+insert.js
+distinct.js
+filterColumns.js
+```
+
+Each file handles one independent action.
+
+This creates:
+
+- separation of concerns
+- isolated debugging
+- safer refactoring
+- reusable workflows
 
 ---
 
-# Command Execution Flow
+# Folder Strategy
+
+## core/
+
+Contains reusable infrastructure logic.
+
+Examples:
+
+- parsing
+- command resolution
+- shared helpers
+
+---
+
+## config/
+
+Contains metadata and runtime mappings.
+
+Examples:
+
+- actions.json
+- command registry
+
+---
+
+## tasks/
+
+Contains executable business workflows.
+
+This is where actual generation logic lives.
+
+---
+
+# Dynamic Import Strategy
+
+Dynamic imports are a major architectural decision in this project.
 
 Example:
 
-```bash
-npx kschema-api-gen insert
+```js
+await import(path)
 ```
 
-Internal flow:
+Benefits:
 
-```txt
+- lazy loading
+- reduced startup overhead
+- scalable command system
+- plugin-style extensibility
+
+Only required modules are loaded during execution.
+
+---
+
+# Version Isolation
+
+The architecture supports independent runtime versions.
+
+Example:
+
+```text
+v15/
+v16/
+v17/
+```
+
+Why this matters:
+
+- old projects continue working
+- new versions evolve safely
+- breaking changes stay isolated
+- migration becomes controlled
+
+This is similar to how larger frameworks maintain runtime compatibility.
+
+---
+
+# Scalability Model
+
+This architecture scales horizontally.
+
+Meaning:
+
+adding new commands does not require modifying the execution engine.
+
+To add a command:
+
+1. Create task file
+2. Register action in `actions.json`
+3. Done
+
+The core runtime remains unchanged.
+
+That is a strong scalability characteristic.
+
+---
+
+# Example Command Lifecycle
+
+Example user command:
+
+```bash
+kschema-api-gen-actions Insert
+```
+
+Execution path:
+
+```text
 cli.js
     ↓
-start.js
+loadRunner.js
     ↓
-parseInput()
+v17/start.js
     ↓
-resolveCommand("insert")
+resolveCommand.js
     ↓
 actions.json lookup
     ↓
 dynamic import
     ↓
-tasks/actions/insert.js
-    ↓
-execute action
+insert.js execution
 ```
 
+This is the full execution pipeline.
+
 ---
 
-# Why This Architecture is Better
+# Architectural Strengths
 
-## Old v12 Problems
+## Modular
 
-```txt
-manual imports ❌
-manual maps ❌
-duplicate export files ❌
-multiple update points ❌
+Every layer has a dedicated responsibility.
+
+---
+
+## Extensible
+
+New commands can be added without changing the engine.
+
+---
+
+## Maintainable
+
+Smaller isolated files simplify debugging.
+
+---
+
+## Version Safe
+
+Older runtimes remain untouched.
+
+---
+
+## Plugin Friendly
+
+Dynamic imports enable future plugin systems.
+
+---
+
+# Design Philosophy
+
+This project follows a simple principle:
+
+```text
+Small focused modules are easier to scale than large intelligent files.
 ```
 
----
+The architecture prioritizes:
 
-## New v13 Benefits
-
-```txt
-single source of truth ✅
-dynamic imports ✅
-less maintenance ✅
-easier scaling ✅
-clean architecture ✅
-```
-
----
-
-# Important Concept
-
-The application is NOT fully JSON driven.
-
-Only metadata is JSON driven.
-
-Meaning:
-
-```txt
-JSON → describes commands
-JS → contains business logic
-```
-
-This is intentional and good architecture.
-
----
-
-# Testing
-
-Tests use:
-
-```txt
-loadCommand.js
-```
-
-instead of direct imports.
-
-This keeps tests aligned with real CLI behavior.
-
----
-
-# Example Test Flow
-
-```txt
-test/distinct.js
-    ↓
-loadCommand.js
-    ↓
-actions.json
-    ↓
-tasks/actions/distinct.js
-```
-
----
-
-# Coding Style
-
-Project follows:
-
-- ESM modules
-- async/await
-- dynamic imports
-- convention-based architecture
-- minimal configuration
-
----
-
-# Future Improvements
-
-Potential future ideas:
-
-- auto action generation
-- template engine
-- TypeScript support
-- Swagger generation
-- Prisma support
-- Sequelize support
-- MongoDB support
-- validation generation
-
----
-
-# Beginner Advice
-
-If you are new to this project:
-
-start reading in this order:
-
-```txt
-1. cli.js
-2. start.js
-3. parseInput.js
-4. resolveCommand.js
-5. actions.json
-6. tasks/actions/
-```
-
-This will help you understand the entire flow quickly.
-
----
-
-# Philosophy
-
-This project values:
-
-- simplicity
-- developer speed
+- clarity
+- modularity
 - scalability
-- maintainability
-- low repetition
-- predictable structure
+- controlled evolution
+- runtime flexibility
 
 ---
 
-# Final Note
+# Future Possibilities
 
-v13 was a major architectural cleanup.
+This structure can evolve into:
 
-The biggest improvement was:
+- full CLI framework
+- plugin ecosystem
+- code generation platform
+- scaffolding engine
+- API workflow automation system
 
-```txt
-moving from duplicated configuration
-to centralized metadata
-```
+The current architecture already supports that direction.
 
-This made the project easier to maintain and extend.
+---
+
+# Conclusion
+
+This project demonstrates how a simple utility can evolve into a scalable developer platform through:
+
+- layered architecture
+- dynamic imports
+- command registries
+- isolated runtimes
+- modular execution pipelines
+
+The codebase is intentionally structured to support long-term growth while keeping execution logic understandable and maintainable.
