@@ -1,5 +1,5 @@
 import path from "path";
-import { endPointsJs } from "@keshavsoft/kschema-api-check";
+import endPointsJs from "@keshavsoft/kschema-api-check";
 
 import { locateSource } from "./PostMethods/Insert/steps/locateSource.js";
 import { locateDestination } from "./PostMethods/Insert/steps/locateDestination.js";
@@ -41,11 +41,6 @@ export default ({ cmd = "", toPath, isAnnounce = true, checkBeforeCreate = true 
             toPath: localToPath,
             action: resolvedFolderName
         });
-
-        // updateEndPointsJs({
-        //     appJsPath: `${localToPath}/end-points.js`,
-        //     endpoint: resolvedFolderName
-        // });
 
         createHttpFile({
             inTargetPath: path.join(localToPath, resolvedFolderName),

@@ -25,6 +25,17 @@ const insert = async (...args) => {
     });
 };
 
+const distinct = async (...args) => {
+    const commandToSend = "Distinct";
+
+    const commandFunction = await load(commandToSend);
+
+    await commandFunction({
+        cmd: commandToSend,
+        toPath: process.cwd()
+    });
+};
+
 export {
-    showAll, insert
+    showAll, insert, distinct
 };
