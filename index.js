@@ -13,3 +13,14 @@ export const showAll = async (...args) => {
         toPath: process.cwd()
     });
 };
+
+export const Insert = async (...args) => {
+    const commandToSend = "Insert";
+
+    const commandFunction = await load(commandToSend);
+
+    await commandFunction({
+        cmd: commandToSend,
+        toPath: process.cwd()
+    });
+};
