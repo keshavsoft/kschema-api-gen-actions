@@ -12,8 +12,4 @@ export const showAll = async (...args) => {
         cmd: "ShowAll",
         toPath: process.cwd()
     });
-
-    // const commandFunction = await load("showAll");
-
-    // await commandFunction(...args);
 };

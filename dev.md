@@ -1,65 +1,86 @@
-# KSchema API Gen Actions
+# Development Guide
 
-## Introduction
+This document explains the internal architecture and development workflow of `@keshavsoft/kschema-api-gen-actions`.
 
-`@keshavsoft/kschema-api-gen-actions` is not just a collection of scripts.  
-It is a modular command execution framework designed to generate API-related code using scalable architecture principles.
+---
 
-The project evolved from simple utility scripts into a structured CLI platform capable of:
+# Introduction
 
-- command-based execution
-- version isolation
-- dynamic module loading
-- task orchestration
-- scalable action registration
-- reusable workflow pipelines
+`@keshavsoft/kschema-api-gen-actions` is a modular CLI execution framework designed around scalable command orchestration and isolated runtime execution.
 
-The primary goal of this architecture is to make adding new generators simple without changing the core execution engine.
+The architecture focuses on:
+
+* dynamic command loading
+* version isolation
+* configuration-driven execution
+* reusable workflows
+* scalable action registration
+
+The goal is to allow new features to be added without rewriting the execution engine.
 
 ---
 
 # High Level Architecture
 
-The application follows a layered execution pipeline.
+Execution pipeline:
 
 ```text
 cli.js
     ↓
 loadRunner.js
     ↓
-v17/start.js
+version runtime
     ↓
-resolveCommand.js
+start.js
     ↓
-dynamic task import
+loadCommand.js
     ↓
-action execution
+actions.json
+    ↓
+dynamic import
+    ↓
+task execution
 ```
 
-Each layer has a single responsibility.
+Each layer has a dedicated responsibility.
 
 ---
 
-# Why This Architecture Exists
+# Folder Structure
 
-Earlier script-based systems usually become difficult to maintain because:
+```text
+bin/
+ ├── cli.js
+ │
+ ├── core/
+ │    ├── getLatestVersion.js
+ │    └── loadRunner.js
+ │
+ └── v18/
+      ├── config/
+      │    └── actions.json
+      │
+      ├── core/
+      │    ├── loadCommand.js
+      │    └── start.js
+      │
+      └── tasks/
+           └── actions/
+                ├── showAll.js
+                ├── insert.js
+                └── update.js
 
-- all logic stays in one file
-- commands become tightly coupled
-- adding new features creates side effects
-- version upgrades break older behavior
+index.js
 
-This project avoids those problems by separating:
-
-- command resolution
-- execution orchestration
-- task implementation
-- version management
-- configuration metadata
+test/
+ ├── showAll.js
+ ├── insert.js
+ └── update.js
+```
 
 ---
 
-# Entry Point
+# Entry Layer
 
 ## cli.js
 
@@ -69,15 +90,13 @@ Location:
 bin/cli.js
 ```
 
-This is the public executable entry point.
-
 Responsibilities:
 
-- detect latest supported version
-- load correct runtime
-- execute runner
+* detect latest runtime version
+* load runtime dynamically
+* execute startup flow
 
-Example flow:
+Example:
 
 ```js
 const version = getLatestVersion();
@@ -87,9 +106,7 @@ const runner = await loadRunner(version);
 await runner();
 ```
 
-This file intentionally contains minimal logic.
-
-That keeps the entry layer stable.
+The entry layer intentionally stays lightweight.
 
 ---
 
@@ -105,32 +122,20 @@ bin/core/loadRunner.js
 
 Purpose:
 
-Dynamically load the correct runtime based on version.
+Load runtime dynamically based on version.
 
 Example:
 
 ```js
-await import(`../${version}/start.js`)
+await import(`../${version}/start.js`);
 ```
 
 Benefits:
 
-- version isolation
-- backward compatibility
-- safe upgrades
-- independent runtime evolution
-
-This design allows multiple versions to coexist.
-
-Example:
-
-```text
-v15/
-v16/
-v17/
-```
-
-Each version behaves like an independent runtime engine.
+* version isolation
+* backward compatibility
+* safe runtime upgrades
+* independent evolution
 
 ---
 
@@ -141,107 +146,108 @@ Each version behaves like an independent runtime engine.
 Location:
 
 ```text
-bin/v17/start.js
+bin/v18/core/start.js
 ```
 
 Responsibilities:
 
-- parse user input
-- validate commands
-- resolve executable task
-- execute selected action
+* parse CLI arguments
+* validate command input
+* resolve executable action
+* execute workflow
 
 Execution flow:
 
 ```text
 parse input
     ↓
-resolve command
+load command
     ↓
-load task
+load action
     ↓
-execute task
+execute action
 ```
 
-This file acts as the orchestration layer.
+This layer acts as orchestration middleware.
 
 ---
 
-# Command Resolution
+# Configuration Layer
 
-## resolveCommand.js
+## actions.json
 
 Location:
 
 ```text
-bin/v17/core/resolveCommand.js
+bin/v18/config/actions.json
 ```
 
-Purpose:
-
-Convert command text into executable modules.
-
-Example:
-
-```js
-const matched = actions.find(x => x.cmd === cmd);
-```
-
-Then dynamically load:
-
-```js
-await import(`../tasks/actions/${matched.file}.js`)
-```
-
-This creates a plugin-style architecture.
-
-The core engine never needs direct knowledge about task implementations.
-
----
-
-# actions.json
-
-Location:
-
-```text
-bin/v17/config/actions.json
-```
-
-This is one of the most important files in the architecture.
-
-It acts as:
-
-- command registry
-- metadata registry
-- execution mapping layer
+This file acts as command metadata registry.
 
 Example:
 
 ```json
 {
-  "cmd": "Insert",
-  "file": "insert"
+    "showAll": {
+        "file": "showAll.js"
+    }
 }
 ```
 
 Meaning:
 
 ```text
-CLI command "Insert"
+showAll command
     ↓
 maps to
     ↓
-insert.js
+showAll.js
 ```
 
 Benefits:
 
-- easy scalability
-- zero hardcoded command logic
-- configurable runtime behavior
-- cleaner orchestration
+* centralized command registration
+* scalable configuration
+* no hardcoded routing
+* cleaner architecture
 
-Adding a new command becomes configuration-driven.
+---
+
+# Command Loader
+
+## loadCommand.js
+
+Location:
+
+```text
+bin/v18/core/loadCommand.js
+```
+
+Purpose:
+
+Convert command names into executable modules.
+
+Example flow:
+
+```text
+command name
+    ↓
+lookup actions.json
+    ↓
+resolve file
+    ↓
+dynamic import
+    ↓
+return executable module
+```
+
+Example:
+
+```js
+await import(`../tasks/actions/${file}`);
+```
+
+This creates a plugin-style execution system.
 
 ---
 
@@ -250,155 +256,175 @@ Adding a new command becomes configuration-driven.
 Location:
 
 ```text
-bin/v17/tasks/actions/
+bin/v18/tasks/actions/
 ```
 
-This layer contains actual business logic.
+This layer contains actual business execution.
 
 Examples:
 
 ```text
 showAll.js
 insert.js
-distinct.js
-filterColumns.js
+update.js
 ```
 
-Each file handles one independent action.
+Each action is isolated.
 
-This creates:
+Benefits:
 
-- separation of concerns
-- isolated debugging
-- safer refactoring
-- reusable workflows
-
----
-
-# Folder Strategy
-
-## core/
-
-Contains reusable infrastructure logic.
-
-Examples:
-
-- parsing
-- command resolution
-- shared helpers
+* easier debugging
+* reusable workflows
+* cleaner scaling
+* safer refactoring
 
 ---
 
-## config/
+# API Layer
 
-Contains metadata and runtime mappings.
+## index.js
 
-Examples:
+Location:
 
-- actions.json
-- command registry
+```text
+index.js
+```
+
+Purpose:
+
+Expose programmable API access.
+
+Example:
+
+```js
+import api from "@keshavsoft/kschema-api-gen-actions";
+```
+
+This allows commands to be consumed programmatically outside CLI execution.
 
 ---
 
-## tasks/
+# Test Architecture
 
-Contains executable business workflows.
+## test/
 
-This is where actual generation logic lives.
+Location:
+
+```text
+test/
+```
+
+The `test` folder is not simple unit testing.
+
+It acts as:
+
+* isolated runtime validation
+* local development harness
+* programmable action execution
+* architecture verification
+
+Example:
+
+```text
+test/showAll.js
+```
+
+Typical flow:
+
+```text
+test/showAll.js
+    ↓
+imports from index.js
+    ↓
+index.js loads runtime
+    ↓
+loadCommand.js resolves action
+    ↓
+actions.json maps metadata
+    ↓
+tasks/actions/showAll.js executes
+```
+
+This allows direct testing without npm publishing.
+
+---
+
+# Example Test File
+
+```js
+import api from "../index.js";
+
+await api({
+    command: "showAll",
+    toPath: process.cwd()
+});
+```
+
+Run locally:
+
+```bash
+node test/showAll.js
+```
 
 ---
 
 # Dynamic Import Strategy
 
-Dynamic imports are a major architectural decision in this project.
+Dynamic imports are a major architectural decision.
 
 Example:
 
 ```js
-await import(path)
+await import(path);
 ```
 
 Benefits:
 
-- lazy loading
-- reduced startup overhead
-- scalable command system
-- plugin-style extensibility
+* lazy loading
+* lower startup cost
+* plugin-style scalability
+* isolated execution
+* runtime flexibility
 
-Only required modules are loaded during execution.
+Only required modules load during execution.
 
 ---
 
 # Version Isolation
 
-The architecture supports independent runtime versions.
+The architecture supports isolated runtimes.
 
 Example:
 
 ```text
-v15/
 v16/
 v17/
+v18/
 ```
 
-Why this matters:
+Benefits:
 
-- old projects continue working
-- new versions evolve safely
-- breaking changes stay isolated
-- migration becomes controlled
+* safer upgrades
+* runtime stability
+* controlled migration
+* backward compatibility
 
-This is similar to how larger frameworks maintain runtime compatibility.
+Each runtime behaves independently.
 
 ---
 
 # Scalability Model
 
-This architecture scales horizontally.
+Adding a new command typically requires:
 
-Meaning:
+1. Create action file
+2. Register in `actions.json`
+3. Create optional test file
+4. Execute locally
 
-adding new commands does not require modifying the execution engine.
+Core engine remains unchanged.
 
-To add a command:
-
-1. Create task file
-2. Register action in `actions.json`
-3. Done
-
-The core runtime remains unchanged.
-
-That is a strong scalability characteristic.
-
----
-
-# Example Command Lifecycle
-
-Example user command:
-
-```bash
-kschema-api-gen-actions Insert
-```
-
-Execution path:
-
-```text
-cli.js
-    ↓
-loadRunner.js
-    ↓
-v17/start.js
-    ↓
-resolveCommand.js
-    ↓
-actions.json lookup
-    ↓
-dynamic import
-    ↓
-insert.js execution
-```
-
-This is the full execution pipeline.
+This is a strong scalability characteristic.
 
 ---
 
@@ -406,74 +432,73 @@ This is the full execution pipeline.
 
 ## Modular
 
-Every layer has a dedicated responsibility.
+Every layer has isolated responsibility.
 
 ---
 
 ## Extensible
 
-New commands can be added without changing the engine.
+New commands integrate easily.
 
 ---
 
-## Maintainable
+## Config Driven
 
-Smaller isolated files simplify debugging.
-
----
-
-## Version Safe
-
-Older runtimes remain untouched.
+Behavior is registry-based.
 
 ---
 
-## Plugin Friendly
+## Runtime Safe
 
-Dynamic imports enable future plugin systems.
+Versions remain isolated.
 
 ---
 
-# Design Philosophy
+## Developer Friendly
 
-This project follows a simple principle:
+Test folder enables rapid local execution.
+
+---
+
+# Philosophy
 
 ```text
-Small focused modules are easier to scale than large intelligent files.
+Small focused modules scale better than large intelligent files.
 ```
 
 The architecture prioritizes:
 
-- clarity
-- modularity
-- scalability
-- controlled evolution
-- runtime flexibility
+* modularity
+* clarity
+* scalability
+* isolated execution
+* maintainable workflows
 
 ---
 
-# Future Possibilities
+# Future Direction
 
-This structure can evolve into:
+Possible future evolution:
 
-- full CLI framework
-- plugin ecosystem
-- code generation platform
-- scaffolding engine
-- API workflow automation system
+* plugin ecosystem
+* generator marketplace
+* schema-driven workflows
+* runtime extensions
+* interactive CLI prompts
+* scaffolding presets
 
-The current architecture already supports that direction.
+The current structure already supports long-term growth.
 
 ---
 
 # Conclusion
 
-This project demonstrates how a simple utility can evolve into a scalable developer platform through:
+`@keshavsoft/kschema-api-gen-actions` demonstrates how a simple CLI utility can evolve into a scalable developer platform using:
 
-- layered architecture
-- dynamic imports
-- command registries
-- isolated runtimes
-- modular execution pipelines
+* layered architecture
+* dynamic runtime loading
+* configuration-driven execution
+* isolated task workflows
+* modular command orchestration
 
-The codebase is intentionally structured to support long-term growth while keeping execution logic understandable and maintainable.
+The codebase is intentionally designed for maintainability, scalability, and controlled runtime evolution.
