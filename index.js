@@ -5,7 +5,7 @@ const load = async (cmd) => {
     return module.default(cmd); // Returns a function
 };
 
-export const showAll = async (...args) => {
+const showAll = async (...args) => {
     const commandFunction = await load("ShowAll");
 
     await commandFunction({
@@ -14,7 +14,7 @@ export const showAll = async (...args) => {
     });
 };
 
-export const Insert = async (...args) => {
+const insert = async (...args) => {
     const commandToSend = "Insert";
 
     const commandFunction = await load(commandToSend);
@@ -23,4 +23,8 @@ export const Insert = async (...args) => {
         cmd: commandToSend,
         toPath: process.cwd()
     });
+};
+
+export {
+    showAll, insert
 };

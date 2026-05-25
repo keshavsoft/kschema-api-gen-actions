@@ -1,6 +1,6 @@
-import { showAll } from "../index.js";
+import { insert } from "../index.js";
 
-showAll({
+insert({
     cmd: "Insert",
     toPath: process.cwd()
 });
