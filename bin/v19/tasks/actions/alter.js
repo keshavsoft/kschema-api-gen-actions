@@ -12,9 +12,10 @@ import { announce } from "./PostMethods/Alter/steps/announce.js";
 
 import resolveFolderName from "./PostMethods/Alter/steps/resolveFolderName.js";
 
-export default ({ cmd = "", toPath, isAnnounce = true,
+const startFunc = async ({ cmd = "", toPath, isAnnounce = true,
     checkBeforeCreate = true, showLog = false }) => {
-    console.log("showLog : ", showLog);
+
+    // console.log("-------- : ", showLog);
 
     const localToPath = toPath;
 
@@ -40,7 +41,7 @@ export default ({ cmd = "", toPath, isAnnounce = true,
     });
 
     if (createFolderResponse.KTF) {
-        const fromEndPointsJs = endPointsJs({
+        const fromEndPointsJs = await endPointsJs({
             toPath: localToPath,
             action: resolvedFolderName
         });
@@ -57,3 +58,5 @@ export default ({ cmd = "", toPath, isAnnounce = true,
 
     return resolvedFolderName;
 };
+
+export default startFunc;
