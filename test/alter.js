@@ -2,5 +2,6 @@ import { alter } from "../index.js";
 
 alter({
     cmd: "Alter",
-    toPath: process.cwd()
+    toPath: process.cwd(),
+    showLog: true
 });

@@ -42,6 +42,7 @@ const alter = async (...args) => {
     const commandFunction = await load(commandToSend);
 
     await commandFunction({
+        ...args,
         cmd: commandToSend,
         toPath: process.cwd()
     });

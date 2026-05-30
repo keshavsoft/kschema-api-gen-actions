@@ -14,6 +14,8 @@ import resolveFolderName from "./PostMethods/Alter/steps/resolveFolderName.js";
 
 export default ({ cmd = "", toPath, isAnnounce = true,
     checkBeforeCreate = true, showLog = false }) => {
+    console.log("showLog : ", showLog);
+
     const localToPath = toPath;
 
     const resolvedFolderName = resolveFolderName({
