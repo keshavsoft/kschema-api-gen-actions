@@ -36,6 +36,17 @@ const distinct = async (...args) => {
     });
 };
 
+const alter = async (...args) => {
+    const commandToSend = "Alter";
+
+    const commandFunction = await load(commandToSend);
+
+    await commandFunction({
+        cmd: commandToSend,
+        toPath: process.cwd()
+    });
+};
+
 export {
-    showAll, insert, distinct
+    showAll, insert, distinct, alter
 };
