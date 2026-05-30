@@ -1,8 +1,9 @@
 export default function parseInput() {
-    const [cmd] = process.argv.slice(2);
+    const [cmd, showLog] = process.argv.slice(2);
 
     return {
         cmd: cmd || null,
-        toPath: process.cwd()
+        toPath: process.cwd(),
+        showLog: showLog || false
     };
 };

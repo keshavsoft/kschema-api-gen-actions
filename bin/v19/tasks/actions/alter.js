@@ -12,7 +12,8 @@ import { announce } from "./PostMethods/Alter/steps/announce.js";
 
 import resolveFolderName from "./PostMethods/Alter/steps/resolveFolderName.js";
 
-export default ({ cmd = "", toPath, isAnnounce = true, checkBeforeCreate = true }) => {
+export default ({ cmd = "", toPath, isAnnounce = true,
+    checkBeforeCreate = true, showLog = false }) => {
     const localToPath = toPath;
 
     const resolvedFolderName = resolveFolderName({
@@ -37,10 +38,12 @@ export default ({ cmd = "", toPath, isAnnounce = true, checkBeforeCreate = true 
     });
 
     if (createFolderResponse.KTF) {
-        endPointsJs({
+        const fromEndPointsJs = endPointsJs({
             toPath: localToPath,
             action: resolvedFolderName
         });
+
+        if (showLog) console.log("fromEndPointsJs : ", fromEndPointsJs);
 
         createHttpFile({
             inTargetPath: path.join(localToPath, resolvedFolderName),
