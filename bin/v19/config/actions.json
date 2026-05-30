@@ -42,5 +42,16 @@
             "importLine": "import filterColumnsFunc from './FilterColumns/controller.js';",
             "usageLine": "router.post('/FilterColumns', express.json(), (req, res) => filterColumnsFunc({ req, res, inTableName : tableName}));"
         }
+    },
+    {
+        "cmd": "Alter",
+        "file": "alter",
+        "exportFile": "Alter",
+        "group": "PostMethods",
+        "description": "Generate Alter POST action",
+        "endPointsJs": {
+            "importLine": "import { postFunc } from './Alter/controller.js';",
+            "usageLine": "router.post('/Alter', express.json(), (req, res) => postFunc({ req, res, inTableName : tableName}));"
+        }
     }
 ]
